@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "os-cpu1" do |node|
     node.vm.provider "virtualbox" do |v|
       v.name = "os-cpu1"
-      v.memory = 1024
+      v.memory = 2048
       v.cpus = 1
     end
     node.vm.box = "centos/7"
@@ -55,6 +55,29 @@ Vagrant.configure("2") do |config|
       pip install configparser
     SHELL
   end
+
+  config.vm.define "os-net1" do |node|
+    node.vm.provider "virtualbox" do |v|
+      v.name = "os-net1"
+      v.memory = 512
+      v.cpus = 1
+    end
+    node.vm.box = "centos/7"
+    node.vm.hostname="os-net1"
+    node.vm.network "private_network", ip: "192.168.56.17"
+    node.vm.provision "shell", privileged: true, inline: <<-SHELL
+      systemctl stop NetworkManager
+      systemctl disable NetworkManager
+      mkdir -p /root/.ssh
+      cp /vagrant/id_rsa.pub /root/.ssh/authorized_keys
+      chmod -R 600 /root/.ssh
+      cp /vagrant/hosts /etc/hosts
+      yum -y install epel-release
+      yum install -y python-pip
+      pip install configparser
+    SHELL
+  end
+
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.
